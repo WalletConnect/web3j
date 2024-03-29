@@ -77,6 +77,7 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
     public void testCreateValidParamName() {
         assertEquals(createValidParamName("param", 1), ("param"));
         assertEquals(createValidParamName("", 1), ("param1"));
+        assertEquals(createValidParamName("class", 1), ("_class"));
     }
 
     @Test
@@ -969,5 +970,26 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
         assertEquals(2, methodSpecs.size());
         assertEquals(expectedCall, methodSpecs.get(0).toString());
         assertEquals(expectedSend, methodSpecs.get(1).toString());
+    }
+
+    @Test
+    public void testBuildFunctionLinkBinaryWithReferences() throws Exception {
+        MethodSpec methodSpec = solidityFunctionWrapper.buildLinkLibraryMethod();
+
+        String expected =
+                "public static void linkLibraries(java.util.List<org.web3j.tx.Contract.LinkReference> references) {\n"
+                        + "  librariesLinkedBinary = linkBinaryWithReferences(BINARY, references);\n"
+                        + "}\n";
+
+        assertEquals(methodSpec.toString(), (expected));
+    }
+
+    @Test
+    public void testBinaryWithUnlinkedLibraryLengthOver65534() throws Exception {
+        solidityFunctionWrapper.createBinaryDefinition(
+                "0x"
+                        + "a".repeat(40000)
+                        + "__$927c5a12e2f339676f56d42ec1c0537964$__"
+                        + "a".repeat(40000));
     }
 }

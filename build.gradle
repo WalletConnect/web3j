@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'idea'
+    id 'org.sonarqube' version '3.4.0.2513'
     id 'jacoco'
     id 'com.diffplug.gradle.spotless' version '4.5.1'
     id 'io.codearte.nexus-staging' version '0.22.0'
@@ -20,15 +21,18 @@ ext {
     jnr_unixsocketVersion = '0.38.17'
     okhttpVersion = '4.9.0'
     rxjavaVersion = '2.2.2'
-    slf4jVersion = '1.7.30'
+    slf4jVersion = '2.0.11'
     javaWebSocketVersion = '1.5.3'
     picocliVersion = '3.0.0'
+    ensAdraffyVersion = '0.1.2'
+    kzg4844Version = '0.8.0'
+    tuweniVersion = '2.4.2'
     // test dependencies
-    equalsverifierVersion = '3.5.5'
+    equalsverifierVersion = '3.14.1'
     junitVersion = '5.5.2'
-    web3jUnitVersion = '4.9.7'
+    web3jUnitVersion = '4.11.2'
     junitBenchmarkVersion = '0.7.2'
-    logbackVersion = '1.2.3'
+    logbackVersion = '1.4.14'
     mockitoJunitVersion = '3.1.0'
     junitPlatformLauncherVersion = '1.5.2'
 }
@@ -70,9 +74,13 @@ allprojects {
         useJUnitPlatform()
     }
 
+    repositories {
+        maven { url "https://artifacts.consensys.net/public/maven/maven/" }
+    }
+
     dependencies {
-        testCompile "org.junit.jupiter:junit-jupiter:$junitVersion"
-        testCompile "org.mockito:mockito-junit-jupiter:$mockitoJunitVersion"
+        testImplementation "org.junit.jupiter:junit-jupiter:$junitVersion"
+        testImplementation "org.mockito:mockito-junit-jupiter:$mockitoJunitVersion"
 
         configurations.all {
             resolutionStrategy {
@@ -96,3 +104,7 @@ allprojects {
 configure(subprojects.findAll { it.name != 'integration-tests' }) {
     apply from: "$rootDir/gradle/jacoco/build.gradle"
 }
+
+
+tasks.named("spotlessJava").configure { dependsOn("spotlessGroovyGradle") }
+tasks.named("spotlessKotlin").configure { dependsOn("spotlessJava", "spotlessGroovyGradle") }
